@@ -1,0 +1,5 @@
+*.opendb
+builds/
+OpenGL - Engine/Release/
+OpenGL - Engine/Debug/
+*.db
