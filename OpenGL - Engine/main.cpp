@@ -2,13 +2,23 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#define GLM_SWIZZLE
 #include <Gizmos.h>
 #include <glm\glm.hpp>
 #include <glm\ext.hpp>
 
+
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
+
+
+glm::mat4 sunTransform(1);	// Creating the transform for sun/planet
+glm::mat4 planetTransform(1);
+
+void SetupSolaSystem();		// Forward declearing functions below main()
+void RenderSolarSystem();
+
 
 int main()
 {
@@ -54,7 +64,9 @@ int main()
 	glClearColor(0.25f, 0.25f, 0.25f, 1); // Clears the colour to a base.
 	glEnable(GL_DEPTH_TEST); // enables the depth buffer
 
-	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
+	SetupSolaSystem(); // Start up solaSystem by rendering the code.
+
+	while (glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS) // Main Game Loop
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//GL_COLOR_BUFFER_BIT informs OpenGL to wipe the back-buffer colours clean. 
@@ -78,6 +90,10 @@ int main()
 		}
 
 
+		// SolarSystem Code for rendering within the screen.
+		RenderSolarSystem();
+
+
 		aie::Gizmos::draw(projection * view); // Able to view the transform of Gizmos.
 		// Game logic and update code goes here.
 		// So does render code.
@@ -89,5 +105,23 @@ int main()
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
+
+}
+
+void SetupSolaSystem()
+{
+	planetTransform[3]	= glm::vec4(4, 0, 0, 1); // Creating the transform for the planet.
+}
+
+void RenderSolarSystem()
+{
+	glm::mat4 rotation = glm::rotate(0.01f, glm::vec3(0, 1, 0));														// Setting initial rotation.
+
+	sunTransform = sunTransform * rotation;																				// Setting the sun to be the centre and rotate around itself.
+	aie::Gizmos::addSphere(sunTransform[3].xyz(), 2.0f, 32, 32, glm::vec4(0.7f, 0.7f, 0.0f, 1), &sunTransform);			// Drawing sun to screen.
+
+	rotation = glm::rotate(0.005f, glm::vec3(0, 1, 0));																	// Resetting Rotation matrix.
+	planetTransform = rotation * planetTransform;																		// Rotate planet around sun. Rotate * Planet.
+	aie::Gizmos::addSphere(planetTransform[3].xyz(), 0.5f, 32, 32, glm::vec4(0.0f, 0.5f, 0.0f, 1), &planetTransform);	// Drawing planet1 to screen.
 
 }
